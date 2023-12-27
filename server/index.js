@@ -13,13 +13,14 @@ const app = express()
 app.use(cors({
   origin: "*"
 }))
+app.use(express.json());
 
 const messageContent = (data) => `
 You are a data analyst and a chart.js chart generator, you will answer with a following exact format.
 With this following data, you will generata a list of logic data charts that explains that will describe the data.
 You'll follow the rules of generating good datavisualisations
-Your response should be a JSON.
-
+Your response should be a JSON with double quotes only.
+Do not shortcut
 The response format: 
 [
   {
@@ -72,23 +73,19 @@ const generateMessage = (data) => [
           }
         }
       }
-      
     ]`
   },
 ]
 
-app.get('/', async (req, res) => {
-  fs.readFile("./collegeeffectifmin.csv", 'utf8', async (err, data) => {
-    if (err) {
-      console.error("Error reading the file:", err);
-      return;
+app.post('/', async (req, res) => {
+  const response = await openai.chat.completions.create({
+    model: "gpt-4",
+    messages: generateMessage(req.body.data),
+    response_format: {
+      type: "json_object"
     }
-    const response = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: generateMessage(data),
-    })
-    res.json(JSON.parse(response.choices[0].message.content))
-  });
+  })
+  res.json(JSON.parse(response.choices[0].message.content))
 })
 
 app.listen(port, () => {
