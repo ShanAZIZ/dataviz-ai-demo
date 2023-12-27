@@ -1,20 +1,11 @@
-document.getElementById('csvFile').addEventListener('change', readFile)
+document.getElementById('generate-charts').addEventListener('click', generateCharts)
 
-function readFile(event) {
-    const file = event.target.files[0]
-
-    Papa.parse(file, {
-        header: true,
-        dynamicTyping: true,
-        complete: async function(results) {
-            const data = results.data
-            const datas = await callOpenAI(data)
-            createCharts(datas)
-        }
-    });
+async function generateCharts() {
+    const datas = await callOpenAI()
+    createCharts(datas)
 }
 
-async function callOpenAI (data) {
+async function callOpenAI () {
     const response = await fetch("http://localhost:3001", {
         method: "GET",
     });
@@ -24,12 +15,18 @@ async function callOpenAI (data) {
 function createCharts(datas) {
     console.log(datas)
     for(const chart of datas) {
+        const containerDiv = document.createElement('div')
+        containerDiv.className = 'container'
+        const title = document.createElement('h3')
+        title.innerText = chart.title
         const div = document.createElement('div')
         div.className = 'chart-container'
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d')
         new Chart(ctx, chart.chartjs)
         div.appendChild(canvas)
-        document.body.appendChild(div)
+        containerDiv.appendChild(title)
+        containerDiv.appendChild(div)
+        document.body.appendChild(containerDiv)
     }
 }
