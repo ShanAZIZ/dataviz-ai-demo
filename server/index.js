@@ -21,14 +21,6 @@ app.use(express.json());
  * @returns 
  */
 const generatePrompt = (data) => `
-You are a data analyst and a chart.js chart generator, you will answer with a following exact format.
-With this following data, you will generata a list of logic data charts that explains that will describe the data.
-You'll follow the rules of generating good datavisualisations
-Your response should be a JSON with double quotes only.
-Do not shortcut the data
-
-Here is the data :
-${data}
 `
 
 /**
@@ -42,7 +34,6 @@ const generateMessage = (prompt) => [
     [
       {
         "title": "Example Chart.js Configuration",
-        "description": "A description of what is represented in the data",
         "chartjs": {
           "type": "bar",
           "data": {
@@ -70,15 +61,6 @@ const generateMessage = (prompt) => [
  * Elle va créer un appel vers l'api d'OPEN AI et recuperer le resultat et le renvoyer vers le navigateur
  */
 app.post('/', async (req, res) => {
-  const prompt = generatePrompt(req.body.data)
-  const response = await openai.chat.completions.create({
-    model: "gpt-4",
-    messages: generateMessage(prompt),
-    response_format: {
-      type: "json_object"
-    }
-  })
-  res.json(JSON.parse(response.choices[0].message.content))
 })
 
 app.listen(port, () => {
